@@ -48,7 +48,13 @@ Item {
                 iconName: "terminal",
                 text: qsTr("Terminal"),
                 enabled: Config.dashboard.showTerminal
-            }
+            },
+            {
+                component: notesComponent,
+                iconName: "edit_note",
+                text: Tr.tr("Notes"),
+                enabled: true
+            },
         ];
         return allTabs.filter(tab => tab.enabled);
     }
@@ -208,6 +214,29 @@ Item {
                 id: terminalComponent
 
                 TerminalTab {}
+            }
+            Component {
+                id: notesComponent
+
+                // A wrapper Item + URL Loader (not a direct "NotesTab {}") so that a missing or broken
+                // Notes file can never stop this file - and therefore the whole dashboard - from loading.
+                Item {
+                    implicitWidth: notesLoader.item ? notesLoader.item.implicitWidth : 840
+                    implicitHeight: notesLoader.item ? notesLoader.item.implicitHeight : 480
+
+                    Loader {
+                        id: notesLoader
+
+                        anchors.fill: parent
+                        source: Qt.resolvedUrl("NotesTab.qml")
+                    }
+
+                    StyledText {
+                        anchors.centerIn: parent
+                        visible: notesLoader.status === Loader.Error
+                        text: Tr.tr("Notes failed to load. Re-run the Caelestia Notes installer.")
+                    }
+                }
             }
 
             Behavior on contentX {
