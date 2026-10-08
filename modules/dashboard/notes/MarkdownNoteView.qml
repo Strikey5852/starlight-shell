@@ -51,6 +51,11 @@ Item {
             hash = ((hash << 5) - hash) + key.charCodeAt(i);
             hash |= 0;
         }
+        hash ^= hash >>> 16;
+        hash = Math.imul(hash, 0x85ebca6b);
+        hash ^= hash >>> 13;
+        hash = Math.imul(hash, 0xc2b2ae35);
+        hash ^= hash >>> 16;
         return shapePool[(hash >>> 0) % shapePool.length];
     }
 
