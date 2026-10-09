@@ -793,21 +793,49 @@ StyledRect {
                                         }
                                     }
 
-                                    // Repeating Pill (Active view)
+                                    // Streak Display (Active view)
                                     StyledRect {
-                                        visible: !root.showTrash && !!(todoRow.modelData && todoRow.modelData.repeating)
+                                        visible: !root.showTrash && !!(todoRow.modelData && todoRow.modelData.repeating) && (todoRow.modelData.streak || 0) > 0
                                         Layout.alignment: Qt.AlignVCenter
                                         radius: Tokens.rounding.full
-                                        implicitHeight: 18
-                                        implicitWidth: repeatingPillText.implicitWidth + 10
-                                        color: Qt.alpha(Colours.palette.m3tertiary, 0.22)
+                                        implicitHeight: 28
+                                        implicitWidth: streakDetailRow.implicitWidth + 8
+                                        color: Colours.palette.m3tertiaryContainer
 
-                                        StyledText {
-                                            id: repeatingPillText
+                                        RowLayout {
+                                            id: streakDetailRow
                                             anchors.centerIn: parent
-                                            text: qsTr("Repeating")
-                                            font: Tokens.font.label.small
-                                            color: Colours.palette.m3tertiary
+                                            spacing: 6
+
+                                            MaterialIcon {
+                                                text: "local_fire_department"
+                                                fontStyle: Tokens.font.icon.medium
+                                                color: Colours.palette.m3onTertiaryContainer
+                                                transform: Translate { x: -3 }
+                                            }
+
+                                            StyledText {
+                                                text: todoRow.modelData ? String(todoRow.modelData.streak || 0) : "0"
+                                                font: Tokens.font.label.large
+                                                color: Colours.palette.m3onTertiaryContainer
+                                            }
+                                        }
+                                    }
+
+                                    // Repeat Icon (Active view) - hidden when streak > 0
+                                    StyledRect {
+                                        visible: !root.showTrash && !!(todoRow.modelData && todoRow.modelData.repeating) && (todoRow.modelData.streak || 0) === 0
+                                        radius: Tokens.rounding.full
+                                        implicitHeight: 28
+                                        implicitWidth: 28
+                                        color: Colours.palette.m3tertiaryContainer
+
+                                        MaterialIcon {
+                                            text: "repeat"
+                                            fontStyle: Tokens.font.icon.medium
+                                            color: Colours.palette.m3onTertiaryContainer
+                                            anchors.centerIn: parent
+                                            transform: Translate { y: 1 }
                                         }
                                     }
 

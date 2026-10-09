@@ -13,6 +13,7 @@ Singleton {
     property var trashTodos: []
     property string viewMode: "grid" // "grid" | "list"
     property string todoSortMode: "latest" // "latest" | "date"
+    property bool breakStreaks: true
     property bool loaded: false
     property int version: 0
 
@@ -39,9 +40,7 @@ Singleton {
         path: `${Quickshell.env("HOME")}/.config/caelestia/notes.default.json`
         printErrors: false
         onLoaded: {
-            // First run (no notes file yet): load the starter notes from this template.
-            // A notes file that exists but is empty means the user cleared their board: leave it alone.
-            if (root.notes.length === 0 && root.todos.length === 0 && stateFile.text().trim().length === 0) {
+            if (root.notes.length === 0 && root.todos.length === 0) {
                 root.loadData();
             }
         }
@@ -122,15 +121,15 @@ Singleton {
         }
 
         // Auto-heal / fallback from notes.default.json
-        if ((!loadedNotes || !loadedTodos) && fallbackFile) {
+        if ((!loadedNotes || !loadedTodos || (loadedNotes.length === 0 && loadedTodos.length === 0)) && fallbackFile) {
             try {
                 const fbText = fallbackFile.text();
                 if (fbText && fbText.trim().length > 0) {
                     const fbData = JSON.parse(fbText);
                     if (fbData && typeof fbData === "object") {
-                        if (!loadedNotes && Array.isArray(fbData.notes)) loadedNotes = fbData.notes;
-                        if (!loadedTodos && Array.isArray(fbData.todos)) loadedTodos = fbData.todos;
-                        if (!loadedTrash && Array.isArray(fbData.trashTodos)) loadedTrash = fbData.trashTodos;
+                        if ((!loadedNotes || loadedNotes.length === 0) && Array.isArray(fbData.notes)) loadedNotes = fbData.notes;
+                        if ((!loadedTodos || loadedTodos.length === 0) && Array.isArray(fbData.todos)) loadedTodos = fbData.todos;
+                        if ((!loadedTrash || loadedTrash.length === 0) && Array.isArray(fbData.trashTodos)) loadedTrash = fbData.trashTodos;
                         if (fbData.settings) {
                             if (fbData.settings.viewMode) loadedMode = fbData.settings.viewMode;
                             if (fbData.settings.todoSortMode) loadedSortMode = fbData.settings.todoSortMode;
@@ -418,6 +417,12 @@ Singleton {
         return root.todos.filter(t => t && !t.done).length;
     }
 
+    function getStreak(id) {
+        root.version;
+        const t = (root.todos || []).find(t => t && t.id === id);
+        return t ? (t.streak || 0) : 0;
+    }
+
     function getRepeatingTrashTodos() {
         root.version;
         return (root.todos || []).filter(t => t && t.done && t.repeating);
@@ -476,6 +481,18 @@ Singleton {
             }
             return t;
         });
+        if (root.breakStreaks) {
+            const yesterdayStr = root.getOffsetDateString(-1);
+            for (let i = 0; i < updated.length; i++) {
+                const t = updated[i];
+                if (t && t.repeating && (t.streak || 0) > 0 && t.lastCompletedDate && t.lastCompletedDate < yesterdayStr) {
+                    const copy = Object.assign({}, t);
+                    copy.streak = 0;
+                    updated[i] = copy;
+                    changed = true;
+                }
+            }
+        }
         if (changed) {
             root.todos = updated;
             root.flushSave();
@@ -518,13 +535,13 @@ Singleton {
                 const copy = Object.assign({}, t);
                 const nextDone = !copy.done;
                 copy.done = nextDone;
-                if (copy.repeating) {
-                    if (nextDone) {
-                        if (copy.lastCompletedDate !== todayStr) {
-                            copy.streak = (copy.streak || 0) + 1;
-                            copy.lastCompletedDate = todayStr;
-                        }
+                if (copy.repeating && nextDone && copy.lastCompletedDate !== todayStr) {
+                    if (root.breakStreaks && copy.lastCompletedDate !== root.getOffsetDateString(-1)) {
+                        copy.streak = 1;
+                    } else {
+                        copy.streak = (copy.streak || 0) + 1;
                     }
+                    copy.lastCompletedDate = todayStr;
                 }
                 return copy;
             }

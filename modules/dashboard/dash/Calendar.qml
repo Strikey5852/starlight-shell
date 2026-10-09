@@ -1,10 +1,10 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Effects
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Shapes
+import QtQuick.Effects
 import M3Shapes
 import Caelestia.Config
 import qs.components

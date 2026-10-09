@@ -9,7 +9,6 @@ import Caelestia.Config
 import Caelestia.I18n
 import qs.components
 import qs.components.filedialog
-import "../../services"
 
 Item {
     id: root
@@ -32,6 +31,12 @@ Item {
                 enabled: Config.dashboard.showMedia
             },
             {
+                component: notesComponent,
+                iconName: "edit_note",
+                text: Tr.tr("Notes"),
+                enabled: true
+            },
+            {
                 component: performanceComponent,
                 iconName: "speed",
                 text: Tr.tr("Performance"),
@@ -48,12 +53,6 @@ Item {
                 iconName: "terminal",
                 text: qsTr("Terminal"),
                 enabled: Config.dashboard.showTerminal
-            },
-            {
-                component: notesComponent,
-                iconName: "edit_note",
-                text: Tr.tr("Notes"),
-                enabled: true
             },
         ];
         return allTabs.filter(tab => tab.enabled);
@@ -104,28 +103,13 @@ Item {
 
             flickableDirection: Flickable.HorizontalFlick
 
-            property real lastValidImplicitWidth: 0
-            implicitWidth: currentItem ? currentItem.implicitWidth : lastValidImplicitWidth
-            onImplicitWidthChanged: {
-                if (currentItem) lastValidImplicitWidth = currentItem.implicitWidth;
-            }
-
-            property real lastValidImplicitHeight: 0
-            implicitHeight: currentItem ? currentItem.implicitHeight : lastValidImplicitHeight
-            onImplicitHeightChanged: {
-                if (currentItem) lastValidImplicitHeight = currentItem.implicitHeight;
-            }
-
-            property real lastValidContentX: 0
-            contentX: currentItem ? currentItem.x : lastValidContentX
+            implicitWidth: currentItem?.implicitWidth ?? 0
+            implicitHeight: currentItem?.implicitHeight ?? 0
+            contentX: currentItem?.x ?? 0
             contentWidth: row.implicitWidth
             contentHeight: row.implicitHeight
 
             onContentXChanged: {
-                if (currentItem && !moving) {
-                    lastValidContentX = contentX;
-                }
-
                 if (!moving || !currentItem)
                     return;
 
@@ -218,25 +202,7 @@ Item {
             Component {
                 id: notesComponent
 
-                // A wrapper Item + URL Loader (not a direct "NotesTab {}") so that a missing or broken
-                // Notes file can never stop this file - and therefore the whole dashboard - from loading.
-                Item {
-                    implicitWidth: notesLoader.item ? notesLoader.item.implicitWidth : 840
-                    implicitHeight: notesLoader.item ? notesLoader.item.implicitHeight : 480
-
-                    Loader {
-                        id: notesLoader
-
-                        anchors.fill: parent
-                        source: Qt.resolvedUrl("NotesTab.qml")
-                    }
-
-                    StyledText {
-                        anchors.centerIn: parent
-                        visible: notesLoader.status === Loader.Error
-                        text: Tr.tr("Notes failed to load. Re-run the Caelestia Notes installer.")
-                    }
-                }
+                NotesTab {}
             }
 
             Behavior on contentX {

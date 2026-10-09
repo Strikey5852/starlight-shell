@@ -362,6 +362,35 @@ Item {
                 }
             }
 
+            // Streak Display
+            StyledRect {
+                visible: root.localRepeating && NotesStore.getStreak(root.activeTodo ? root.activeTodo.id : "") > 0
+                Layout.alignment: Qt.AlignVCenter
+                radius: Tokens.rounding.full
+                implicitHeight: 28
+                implicitWidth: streakDetailRow.implicitWidth + 8
+                color: Colours.palette.m3tertiaryContainer
+
+                RowLayout {
+                    id: streakDetailRow
+                    anchors.centerIn: parent
+                    spacing: 6
+
+                    MaterialIcon {
+                        text: "local_fire_department"
+                        fontStyle: Tokens.font.icon.medium
+                        color: Colours.palette.m3onTertiaryContainer
+                        transform: Translate { x: -3 }
+                    }
+
+                    StyledText {
+                        text: String(NotesStore.getStreak(root.activeTodo ? root.activeTodo.id : ""))
+                        font: Tokens.font.label.large
+                        color: Colours.palette.m3onTertiaryContainer
+                    }
+                }
+            }
+
             Item { Layout.fillWidth: true }
 
             // Character count badge (current/300)
