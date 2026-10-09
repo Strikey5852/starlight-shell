@@ -1,10 +1,10 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Effects
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Shapes
+import QtQuick.Effects
 import M3Shapes
 import Caelestia.Config
 import qs.components
@@ -26,11 +26,6 @@ CustomMouseArea {
     readonly property int animDirection: screenState.dashboardDate > currentDate ? -1 : 1
     property real animTranslate
     property real animOpacity: 1
-
-    property Item hoveredDayItem: null
-    property Item lastHoveredDayItem: null
-    property var lastHoveredModel: lastHoveredDayItem ? lastHoveredDayItem.model : null
-    property var lastHoveredHoliday: lastHoveredDayItem ? lastHoveredDayItem.holiday : null
 
     function onWheel(event: WheelEvent): void {
         if (event.angleDelta.y > 0)
